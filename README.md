@@ -1,65 +1,55 @@
-# Chief of Staff — deploy guide
+# Chief of Staff — deploy guide (v2, fixed)
 
-This is your Chief of Staff app, packaged to run on Vercel. Follow the steps in order. Nothing here needs coding.
+This version is flattened so the important files sit at the top level and can't be dropped during upload. If you deployed the earlier version and it failed with "failed to resolve import /src/main.jsx", that was because the `src` folder didn't upload. This fixes it.
 
-There are three short parts: get an API key, put the code on GitHub, deploy on Vercel.
-
----
-
-## Part A — Get your Anthropic API key (about 5 minutes)
-
-The Pre-reads and Process-a-meeting features call the AI. On your own site that needs an API key. This is a pay-as-you-go key, billed separately from your Claude.ai subscription. The calls are cheap (the app uses the small, fast model by default).
-
-1. Go to **console.anthropic.com** and sign in, or create an account.
-2. Open **Settings → Billing** and add a payment method with a little credit (a few dollars lasts a long time at this usage).
-3. Open **API keys → Create Key**. Give it a name like "chief-of-staff".
-4. Copy the key. It starts with `sk-ant-`. Keep it somewhere safe and private. You will paste it into Vercel later. Do not share it or put it in the code.
+Three parts: get an API key, put the code on GitHub, deploy on Vercel.
 
 ---
 
-## Part B — Put the code on GitHub (about 5 minutes)
+## Part A — Get your Anthropic API key
 
-GitHub is just an online home for the files. Vercel reads the code from there.
+The Pre-reads and Process-a-meeting features call the AI, which needs a key. Pay-as-you-go, separate from your Claude.ai subscription, and cheap at this usage.
 
-1. Unzip the file I gave you. You now have a folder called **chief-of-staff** containing `index.html`, `package.json`, `vite.config.js`, a `src` folder, and an `api` folder.
-2. Go to **github.com** and sign in, or create a free account.
-3. Click the **+** at the top right → **New repository**.
-4. Name it **chief-of-staff**. You can mark it Private. Leave everything else as is and click **Create repository**.
-5. On the next page, click the link **"uploading an existing file"**.
-6. Open the unzipped **chief-of-staff** folder on your computer. Select everything **inside** it (the files plus the `src` and `api` folders) and drag it all onto the GitHub upload area. Important: upload the contents, not the outer folder itself.
-7. Wait for the files to finish uploading, then click **Commit changes**.
+1. Go to **console.anthropic.com**, sign in or create an account.
+2. **Settings → Billing** → add a payment method with a little credit.
+3. **API keys → Create Key** → name it → copy it. It starts with `sk-ant-`. Keep it private.
 
 ---
 
-## Part C — Deploy on Vercel (about 3 minutes)
+## Part B — Put the code on GitHub
 
-1. Go to **vercel.com** and sign in with your account.
-2. Click **Add New → Project**.
-3. Find your **chief-of-staff** repository and click **Import**. If GitHub isn't connected yet, Vercel will ask you to connect it once.
-4. Vercel will detect it as a **Vite** app. Leave the build settings exactly as they are.
-5. Open the **Environment Variables** section and add one:
-   - **Name:** `ANTHROPIC_API_KEY`
-   - **Value:** your `sk-ant-...` key from Part A
-   - Click **Add**.
-   - (Optional) Add a second one — Name `CLAUDE_MODEL`, Value `claude-haiku-5-5` — if you ever want to change which model runs. For higher-quality summaries you can set it to `claude-sonnet-5-5` instead; it costs a bit more.
-6. Click **Deploy**. Wait about a minute.
-7. You'll get a link like **chief-of-staff-xxxx.vercel.app**. Open it. The app loads, and Pre-reads and Process-a-meeting now work because the key is in place.
+If you already made the `chief-of-staff` repo for the first attempt, you can reuse it — just upload these new files over the old ones (GitHub replaces files with the same name). If not, create a new repo first (**+** → New repository → name it `chief-of-staff` → Create).
 
-### Give it a cleaner web address
-In Vercel, open your project → **Settings → Domains**, or rename the project, to get **chief-of-staff.vercel.app** (if that exact name is taken, Vercel will suggest a close one).
+1. Unzip the file I gave you. Inside you'll see these files at the top level: `index.html`, `main.jsx`, `App.jsx`, `package.json`, `vite.config.js`, `.gitignore`, `README.md`, and one `api` folder.
+2. In your repo, click **Add file → Upload files**.
+3. Select **all** of those top-level files and drag them in. Then **also drag the `api` folder** in (or see the note below if the folder won't upload). Click **Commit changes**.
+4. **Check the repo page.** You should see, listed in the repo: `App.jsx`, `main.jsx`, `index.html`, `package.json`, `vite.config.js`, and an `api` folder. If `App.jsx` or `main.jsx` is missing, the upload dropped them — upload again. This check is the thing that was wrong last time.
+
+**If the `api` folder won't upload** (some browsers skip folders): in the repo click **Add file → Create new file**. In the filename box type exactly `api/claude.js` (typing the slash makes the folder). Paste the contents of the `api/claude.js` file from the unzipped folder into the editor, then **Commit changes**.
 
 ---
 
-## Making changes later
+## Part C — Deploy on Vercel
 
-1. Tell me the change; I'll send you updated file(s).
-2. In your GitHub repo, open the file to replace, click the pencil to edit, or re-upload the new file the same way as Part B step 5–7.
-3. Vercel notices the change and rebuilds automatically. In a minute or two the live site updates.
+If you already imported this repo on the first attempt, skip to step 4, then just redeploy (Deployments → latest → Redeploy) after the new files are committed.
+
+1. Go to **vercel.com**, sign in.
+2. **Add New → Project**.
+3. Import your **chief-of-staff** repo (connect GitHub once if asked).
+4. It detects a **Vite** app. Leave the build settings as they are.
+5. Open **Environment Variables** and add: Name `ANTHROPIC_API_KEY`, Value your `sk-ant-...` key → **Add**. (Optional: Name `CLAUDE_MODEL`, Value `claude-haiku-5-5`.)
+6. Click **Deploy**. Wait about a minute. Open the `...vercel.app` link.
 
 ---
+
+## If a build still fails
+
+Read the first red error line. The common ones:
+- **"failed to resolve import ... main.jsx"** → `main.jsx` or `App.jsx` isn't in the repo. Re-upload them (Part B step 4).
+- **AI buttons error, page otherwise fine** → the API key isn't set, or the `api` folder didn't upload. Confirm `ANTHROPIC_API_KEY` in Vercel and that `api/claude.js` is in the repo, then redeploy.
 
 ## Good to know
 
-- **Where your data lives:** on the deployed site, your data is saved in your browser on the device you're using (it isn't on a shared server). Use the same browser to keep your data; clearing browser data will reset it.
-- **Cost:** each Pre-read or Process run uses your Anthropic key and costs a small amount. The default model is the cheapest one.
-- **If the AI buttons show an error:** it's almost always the API key. Check that `ANTHROPIC_API_KEY` is set in Vercel (Settings → Environment Variables), then redeploy (Deployments → the latest one → Redeploy). If the error mentions the model, set `CLAUDE_MODEL` to a current model name from docs.claude.com.
+- **Your data** saves in the browser on the device you use. Same browser keeps your data.
+- **Cost:** each Pre-read or Process run uses your API key; the default model is the cheapest.
+- **Updates:** replace a file in GitHub; Vercel rebuilds automatically.
